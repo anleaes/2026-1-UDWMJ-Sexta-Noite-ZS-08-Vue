@@ -3,51 +3,51 @@
     <q-card style="width: 900px; max-width: 95vw;">
       
       <q-card-section class="bg-primary text-white">
-        <div class="text-h6">{{ form.id ? 'Editar treino' : 'Novo treino' }}</div>
+        <div class="text-h6">{{ form.id ? 'editar treino' : 'novo treino' }}</div>
       </q-card-section>
 
       <q-card-section class="q-pa-md">
         
-        <div class="text-subtitle1 text-weight-bold q-mb-sm">1. Dados do treino</div>
+        <div class="text-subtitle1 text-weight-bold q-mb-sm">1. dados do treino</div>
         <div class="row q-col-gutter-sm q-mb-md">
           <div class="col-12">
-            <q-input outlined v-model="form.nome" label="Nome do treino" required />
+            <q-input outlined v-model="form.nome" label="nome do treino" required />
           </div>
           <div class="col-12 col-md-6">
-            <q-select outlined v-model="form.aluno" :options="opcoesAlunos" emit-value map-options label="Selecione o aluno" required />
+            <q-select outlined v-model="form.aluno" :options="opcoesAlunos" emit-value map-options label="selecione o aluno" required />
           </div>
           <div class="col-12 col-md-6">
-            <q-select outlined v-model="form.instrutor" :options="opcoesInstrutores" emit-value map-options label="Selecione o instrutor" />
+            <q-select outlined v-model="form.instrutor" :options="opcoesInstrutores" emit-value map-options label="selecione o instrutor" />
           </div>
           <div class="col-12 col-md-4">
-            <q-input outlined v-model="form.duracao_minutos" label="Duração (minutos)" type="number" required />
+            <q-input outlined v-model="form.duracao_minutos" label="duracao (minutos)" type="number" required />
           </div>
           <div class="col-12 col-md-8">
-            <q-input outlined v-model="form.descricao" label="Descrição" />
+            <q-input outlined v-model="form.descricao" label="descricao" />
           </div>
         </div>
 
         <q-separator class="q-my-md" />
 
-        <div class="text-subtitle1 text-weight-bold q-mb-sm">2. Adicionar exercício</div>
+        <div class="text-subtitle1 text-weight-bold q-mb-sm">2. adicionar exercicio</div>
         <div class="row q-col-gutter-sm q-mb-md items-center">
           <div class="col-12">
-            <q-select outlined v-model="itemAtual.exercicio" :options="opcoesExercicios" emit-value map-options label="Selecione um exercício" />
+            <q-select outlined v-model="itemAtual.exercicio" :options="opcoesExercicios" emit-value map-options label="selecione um exercicio" />
           </div>
           <div class="col-6 col-md-3">
-            <q-input outlined v-model="itemAtual.series" label="Séries" type="number" />
+            <q-input outlined v-model="itemAtual.series" label="series" type="number" />
           </div>
           <div class="col-6 col-md-3">
-            <q-input outlined v-model="itemAtual.repeticoes" label="Repetições" type="number" />
+            <q-input outlined v-model="itemAtual.repeticoes" label="repeticoes" type="number" />
           </div>
           <div class="col-6 col-md-3">
-            <q-input outlined v-model="itemAtual.carga_kg" label="Carga (kg)" type="number" step="0.1" />
+            <q-input outlined v-model="itemAtual.carga_kg" label="carga (kg)" type="number" step="0.1" />
           </div>
           <div class="col-6 col-md-3">
-            <q-input outlined v-model="itemAtual.intervalo_segundos" label="Intervalo (seg)" type="number" />
+            <q-input outlined v-model="itemAtual.intervalo_segundos" label="intervalo (seg)" type="number" />
           </div>
           <div class="col-12">
-            <q-btn color="positive" class="full-width text-weight-bold" label="Adicionar ao carrinho" @click="adicionarAoCarrinho" />
+            <q-btn color="positive" class="full-width text-weight-bold" label="adicionar ao carrinho" @click="adicionarAoCarrinho" />
           </div>
         </div>
 
@@ -87,12 +87,13 @@
 </template>
 
 <script>
-// backend django
+// chamando a configuracao de api para backend django
 import { apiFetch } from '../../services/api.js'
 
 export default {
   name: 'TreinoForm',
   
+  // propriedades recebidas
   props: {
     aberto: Boolean,
     treinoEdit: {
@@ -105,38 +106,39 @@ export default {
   
   data() {
     return {
-      // cabecalho do treino
+      // estrutura principal da classe treino
       form: {
         id: null, nome: '', aluno: null, instrutor: null, duracao_minutos: null, descricao: ''
       },
-      // variavel temporaria para os inputs do carrinho
+      // estrutura temporaria para itens
       itemAtual: {
         exercicio: null, series: null, repeticoes: null, carga_kg: null, intervalo_segundos: null
       },
-      // array que armazena os itens da associativa
+      // array de associativas
       itensCarrinho: [],
       
-      // listas para popular os dropdowns
+      // select options
       opcoesAlunos: [],
       opcoesInstrutores: [],
       opcoesExercicios: []
     }
   },
 
+  // monitora abertura do modal e preenche dados
+// monitora abertura do modal e preenche dados
   watch: {
-    // limpa ou preenche os dados ao abrir o modal
     aberto(novoValor) {
       if (novoValor && this.treinoEdit) {
         this.form = { ...this.treinoEdit }
-        // assumindo que o backend ja retorne os itens aninhados ao editar
-        this.carregarItensDoTreino(novoValor.id);
+        // correcao: buscando o id do objeto selecionado e nao do booleano
+        this.carregarItensDoTreino(this.treinoEdit.id)
       } else if (novoValor) {
         this.limparForm()
       }
     }
   },
 
-  // carrega dependencias do backend
+  // requisicoes base executadas ao montar
   mounted() {
     apiFetch('/alunos/').then(dados => {
       this.opcoesAlunos = dados.map(a => ({ label: `${a.nome} ${a.sobrenome}`, value: a.id }))
@@ -150,56 +152,56 @@ export default {
   },
   
   methods: {
-
+    // busca e filtra manualmente os itens da associativa
     carregarItensDoTreino(treinoId) {
-    // Filtramos pelo ID do treino (ajuste o parâmetro conforme seu backend/DRF)
-    apiFetch(`/itemtreino/?treino=${treinoId}`)
-      .then((dados) => {
-        // Mapeia os dados recebidos para o formato que seu carrinho entende
-        this.itensCarrinho = dados.map(item => ({
-          id: item.id, // Importante manter o ID para o PUT/DELETE funcionar
-          exercicio: item.exercicio,
-          series: item.series,
-          repeticoes: item.repeticoes,
-          carga_kg: item.carga_kg,
-          intervalo_segundos: item.intervalo_segundos
-        }));
-      })
-      .catch((error) => {
-        console.error('Erro ao carregar itens do treino:', error);
-      });
+      apiFetch(`/itemtreino/?treino=${treinoId}`)
+        .then((dados) => {
+          // trava de seguranca no frontend para ignorar itens de outros treinos
+          const itensFiltrados = dados.filter(item => item.treino === treinoId || item.treino?.id === treinoId)
+
+          this.itensCarrinho = itensFiltrados.map(item => ({
+            id: item.id,
+            exercicio: item.exercicio,
+            series: item.series,
+            repeticoes: item.repeticoes,
+            carga_kg: item.carga_kg,
+            intervalo_segundos: item.intervalo_segundos
+          }))
+        })
+        .catch((error) => {
+          console.error('error fetching itens do treino:', error)
+        })
     },
 
-    // cruza o id com a lista para mostrar o nome no carrinho
+    // traduz id de exercicio para nome
     obterNomeExercicio(id) {
       const ex = this.opcoesExercicios.find(e => e.value === id)
       return ex ? ex.label : 'exercicio desconhecido'
     },
 
-    // logica de manipulacao do array local
+    // adiciona no array temporario e reseta inputs
     adicionarAoCarrinho() {
       if (!this.itemAtual.exercicio) {
         this.$q.notify({ type: 'warning', message: 'selecione um exercicio primeiro.' })
         return
       }
-      // empurra uma copia do item atual para o array
       this.itensCarrinho.push({ ...this.itemAtual })
-      
-      // limpa os inputs temporarios
       this.itemAtual = { exercicio: null, series: null, repeticoes: null, carga_kg: null, intervalo_segundos: null }
     },
     
+    // exclui pelo indice
     removerDoCarrinho(index) {
       this.itensCarrinho.splice(index, 1)
     },
 
+    // reseta formulario completo
     limparForm() {
       this.form = { id: null, nome: '', aluno: null, instrutor: null, duracao_minutos: null, descricao: '' }
       this.itensCarrinho = []
       this.itemAtual = { exercicio: null, series: null, repeticoes: null, carga_kg: null, intervalo_segundos: null }
     },
 
-    // empacota cabecalho e itens num payload unico
+    // emite payload final para a pagina processar
     salvar() {
       if (this.itensCarrinho.length === 0) {
         this.$q.notify({ type: 'warning', message: 'adicione pelo menos um exercicio ao treino.' })
