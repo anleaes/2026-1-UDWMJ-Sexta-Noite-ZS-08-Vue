@@ -2,7 +2,7 @@
   <q-page padding>
     
     <div class="text-h4 q-mb-md text-primary text-weight-bold text-center">
-      Alunos Matriculados
+      Alunos matriculados
     </div>
 
     <div class="row justify-end q-mb-lg">
@@ -37,8 +37,14 @@
       />
     </q-list>
 
+    <AlunoForm 
+      :aberto="formAberto" 
+      @fechar="formAberto = false" 
+      @salvar="salvarAluno" 
+    />
+
     <q-page-sticky position="bottom-right" :offset="[24, 24]">
-      <q-btn fab icon="add" color="primary" class="shadow-4" />
+      <q-btn fab icon="add" color="primary" class="shadow-4" @click="formAberto = true" />
     </q-page-sticky>
 
   </q-page>
@@ -48,6 +54,7 @@
 // chamando os componentes pra dentro da pagina
 import AlunoItem from '../components/alunos/AlunoItem.vue'
 import AlunoCard from '../components/alunos/AlunoCard.vue'
+import AlunoForm from '../components/alunos/AlunoForm.vue'
 
 // backend django
 import { apiFetch } from '../services/api.js' 
@@ -58,13 +65,15 @@ export default {
   // declarando os componentes
   components: {
     AlunoItem,
-    AlunoCard
+    AlunoCard,
+    AlunoForm,
   },
   
   data() {
     return {
       alunos: [],
-      modoVisualizacao: 'grade'
+      modoVisualizacao: 'grade',
+      formAberto: false,
     }
   },
   
@@ -91,6 +100,24 @@ export default {
           console.error('Error deleting aluno:', error)
           this.$q.notify({ type: 'negative', message: 'Erro ao excluir.' })
         })
+    },
+
+    salvarAluno(dados) {
+      // requisição post para criar registro
+      apiFetch('/alunos/', {
+        method: 'POST',
+        body: JSON.stringify(dados)
+      })
+      .then((novoAluno) => {
+        // adiciona o novo registro na tela sem recarregar
+        this.alunos.push(novoAluno)
+        this.formAberto = false
+        this.$q.notify({ type: 'positive', message: 'aluno salvo com sucesso!' })
+      })
+      .catch((error) => {
+        console.error('error saving aluno:', error)
+        this.$q.notify({ type: 'negative', message: 'erro ao salvar registro.' })
+      })
     },
   },
 }
