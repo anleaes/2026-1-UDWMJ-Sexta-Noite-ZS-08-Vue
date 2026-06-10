@@ -11,6 +11,7 @@ const routes = [
       { path: 'treinos', component: () => import('pages/TreinosPage.vue') },
       { path: 'planosmensalidade', component: () => import('pages/PlanosMensalidadePage.vue') },
       { path: 'refeicoes', component: () => import('pages/RefeicaosPage.vue') },
+      { path: 'itemtreino', component: () => import('pages/ItemTreinoPage.vue') },
     ],
   },
 
