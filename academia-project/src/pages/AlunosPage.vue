@@ -8,14 +8,10 @@
     <div class="row justify-end q-mb-lg">
       <q-toggle
         v-model="modoVisualizacao"
-        color="primary"
-        size="lg"
-        checked-icon="view_list"
-        unchecked-icon="grid_view"
-        true-value="lista"
-        false-value="grade"
-        label="lista"
-        left-label
+        color="primary" size="lg"
+        checked-icon="view_list" unchecked-icon="grid_view"
+        true-value="lista" false-value="grade"
+        label="lista" left-label
       />
     </div>
 
@@ -23,6 +19,7 @@
       <div v-for="a in alunos" :key="a.id" class="col-12 col-sm-6 col-md-4">
         <AlunoCard 
           @deletar="deletarAluno" 
+          @editar="abrirEdicao"
           :aluno="a" 
         />
       </div>
@@ -31,42 +28,40 @@
     <q-list v-else bordered separator class="rounded-borders bg-dark">
       <AlunoItem 
         @deletar="deletarAluno" 
+        @editar="abrirEdicao"
         v-for="a in alunos" 
         :key="a.id" 
         :aluno="a" 
       />
     </q-list>
 
+    <q-page-sticky position="bottom-right" :offset="[24, 24]">
+      <q-btn fab icon="add" color="primary" class="shadow-4" @click="abrirCadastro" />
+    </q-page-sticky>
+
     <AlunoForm 
       :aberto="formAberto" 
+      :aluno-edit="alunoSelecionado"
       @fechar="formAberto = false" 
       @salvar="salvarAluno" 
     />
-
-    <q-page-sticky position="bottom-right" :offset="[24, 24]">
-      <q-btn fab icon="add" color="primary" class="shadow-4" @click="formAberto = true" />
-    </q-page-sticky>
 
   </q-page>
 </template>
 
 <script>
-// chamando os componentes pra dentro da pagina
 import AlunoItem from '../components/alunos/AlunoItem.vue'
 import AlunoCard from '../components/alunos/AlunoCard.vue'
 import AlunoForm from '../components/alunos/AlunoForm.vue'
-
-// backend django
 import { apiFetch } from '../services/api.js' 
 
 export default {
   name: 'AlunosPage',
   
-  // declarando os componentes
   components: {
     AlunoItem,
     AlunoCard,
-    AlunoForm,
+    AlunoForm
   },
   
   data() {
@@ -74,51 +69,82 @@ export default {
       alunos: [],
       modoVisualizacao: 'grade',
       formAberto: false,
+      alunoSelecionado: null // armazena temporariamente o aluno a ser editado
     }
   },
   
-  // montagem da tela com os dados django
   mounted() {
     apiFetch('/alunos/')
       .then((dados) => {
         this.alunos = dados
       })
       .catch((error) => {
-        console.error('Error fetching alunos:', error)
+        console.error('error fetching alunos:', error)
       })
   },
   
-  // métodos da page
   methods: {
+    // metodos de controle do modal
+    abrirCadastro() {
+      this.alunoSelecionado = null
+      this.formAberto = true
+    },
+    abrirEdicao(aluno) {
+      this.alunoSelecionado = aluno
+      this.formAberto = true
+    },
+
+    // metodos de api
     deletarAluno(id) {
       apiFetch(`/alunos/${id}/`, { method: 'DELETE' })
         .then(() => {
           this.alunos = this.alunos.filter((a) => a.id !== id)
-          this.$q.notify({ type: 'positive', message: 'Aluno deletado!' }) //atualiza a pagina e retorna sucesso
+          this.$q.notify({ type: 'positive', message: 'aluno deletado!' })
         })
         .catch((error) => {
-          console.error('Error deleting aluno:', error)
-          this.$q.notify({ type: 'negative', message: 'Erro ao excluir.' })
+          console.error('error deleting aluno:', error)
+          this.$q.notify({ type: 'negative', message: 'erro ao excluir.' })
         })
     },
 
     salvarAluno(dados) {
-      // requisição post para criar registro
-      apiFetch('/alunos/', {
-        method: 'POST',
-        body: JSON.stringify(dados)
-      })
-      .then((novoAluno) => {
-        // adiciona o novo registro na tela sem recarregar
-        this.alunos.push(novoAluno)
-        this.formAberto = false
-        this.$q.notify({ type: 'positive', message: 'aluno salvo com sucesso!' })
-      })
-      .catch((error) => {
-        console.error('error saving aluno:', error)
-        this.$q.notify({ type: 'negative', message: 'erro ao salvar registro.' })
-      })
-    },
-  },
+      // verifica se os dados possuem id para decidir entre put e post
+      if (dados.id) {
+        // rotina de atualizacao (put)
+        apiFetch(`/alunos/${dados.id}/`, {
+          method: 'PUT',
+          body: JSON.stringify(dados)
+        })
+        .then((alunoAtualizado) => {
+          // encontra a posicao do aluno antigo e substitui pelo atualizado
+          const index = this.alunos.findIndex(a => a.id === dados.id)
+          if (index !== -1) {
+            this.alunos[index] = alunoAtualizado
+          }
+          this.formAberto = false
+          this.$q.notify({ type: 'positive', message: 'aluno atualizado com sucesso!' })
+        })
+        .catch((error) => {
+          console.error('error updating aluno:', error)
+          this.$q.notify({ type: 'negative', message: 'erro ao atualizar registro.' })
+        })
+      } else {
+        // rotina de criacao (post)
+        apiFetch('/alunos/', {
+          method: 'POST',
+          body: JSON.stringify(dados)
+        })
+        .then((novoAluno) => {
+          this.alunos.push(novoAluno)
+          this.formAberto = false
+          this.$q.notify({ type: 'positive', message: 'aluno criado com sucesso!' })
+        })
+        .catch((error) => {
+          console.error('error saving aluno:', error)
+          this.$q.notify({ type: 'negative', message: 'erro ao criar registro.' })
+        })
+      }
+    }
+  }
 }
 </script>
