@@ -10,6 +10,7 @@ const routes = [
       { path: 'alimentos', component: () => import('pages/AlimentosPage.vue') },
       { path: 'treinos', component: () => import('pages/TreinosPage.vue') },
       { path: 'anamneses', component: () => import('pages/AnamnesesPage.vue') },
+      { path: 'planos-alimentares', component: () => import('pages/PlanosAlimentaresPage.vue') }
     ],
   },
 
