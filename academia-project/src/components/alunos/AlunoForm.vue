@@ -3,7 +3,7 @@
     <q-card style="width: 800px; max-width: 90vw;">
       
       <q-card-section>
-        <div class="text-h6">Novo aluno</div>
+        <div class="text-h6">{{ form.id ? 'Editar aluno' : 'Novo aluno' }}</div>
       </q-card-section>
 
       <q-card-section class="q-pt-none">
@@ -18,7 +18,7 @@
             </div>
 
             <div class="col-12 col-md-6">
-              <q-input outlined v-model="form.email" label="email" type="E-mail" required />
+              <q-input outlined v-model="form.email" label="E-mail" type="email" required />
             </div>
             <div class="col-12 col-md-6">
               <q-input outlined v-model="form.telefone" label="Número de telefone" mask="(##) #####-####" unmasked-value required />
@@ -61,33 +61,28 @@
 </template>
 
 <script>
-// importacao do fetch
 import { apiFetch } from '../../services/api.js'
 
 export default {
   name: 'AlunoForm',
   
   props: {
-    aberto: Boolean
+    aberto: Boolean,
+    // nova propriedade que recebe o aluno selecionado
+    alunoEdit: {
+      type: Object,
+      default: null
+    }
   },
   
   emits: ['fechar', 'salvar'],
   
   data() {
     return {
-      // estrutura atualizada com os campos de pessoa
       form: {
-        nome: '',
-        sobrenome: '',
-        email: '',
-        telefone: '',
-        cpf: '',
-        data_nascimento: '',
-        peso: null,
-        altura: null,
-        genero: '',
-        objetivo: '',
-        plano: null
+        id: null,
+        nome: '', sobrenome: '', email: '', telefone: '', cpf: '', data_nascimento: '',
+        peso: null, altura: null, genero: '', objetivo: '', plano: null
       },
       opcoesGenero: [
         { label: 'Masculino', value: 'M' },
@@ -98,16 +93,24 @@ export default {
       opcoesPlano: []
     }
   },
+
+  // observador para preencher o form quando clicar em editar
+  watch: {
+    alunoEdit(novoValor) {
+      if (novoValor) {
+        // copia os dados do aluno para o form desvinculando do objeto original
+        this.form = { ...novoValor }
+      } else {
+        this.limparForm()
+      }
+    }
+  },
   
-  // carrega planos na inicializacao
   mounted() {
     apiFetch('/planosmensalidade/')
       .then((dados) => {
         this.opcoesPlano = dados.map((p) => {
-          return {
-            label: p.nome,
-            value: p.id
-          }
+          return { label: p.nome, value: p.id }
         })
       })
       .catch((error) => {
@@ -116,14 +119,15 @@ export default {
   },
   
   methods: {
-    salvar() {
-      this.$emit('salvar', this.form)
-      
-      // reseta todos os campos incluindo os novos
+    limparForm() {
       this.form = {
-        nome: '', sobrenome: '', email: '', telefone: '', cpf: '', data_nascimento: '',
+        id: null, nome: '', sobrenome: '', email: '', telefone: '', cpf: '', data_nascimento: '',
         peso: null, altura: null, genero: '', objetivo: '', plano: null
       }
+    },
+    salvar() {
+      this.$emit('salvar', this.form)
+      this.limparForm()
     }
   }
 }
