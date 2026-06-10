@@ -9,9 +9,10 @@ const routes = [
       { path: 'exercicios', component: () => import('pages/ExerciciosPage.vue') },
       { path: 'alimentos', component: () => import('pages/AlimentosPage.vue') },
       { path: 'treinos', component: () => import('pages/TreinosPage.vue') },
+      { path: 'planosmensalidade', component: () => import('pages/PlanosMensalidadePage.vue') },
       { path: 'anamneses', component: () => import('pages/AnamnesesPage.vue') },
       { path: 'planos-alimentares', component: () => import('pages/PlanosAlimentaresPage.vue') },
-      { path: 'refeicoes', component: () => import('pages/RefeicoesPage.vue') }
+      { path: 'refeicoes', component: () => import('pages/RefeicoesPage.vue') },
     ],
   },
 
