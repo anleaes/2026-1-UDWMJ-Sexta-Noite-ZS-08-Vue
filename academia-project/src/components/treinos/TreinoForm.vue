@@ -124,7 +124,6 @@ export default {
     }
   },
 
-  // monitora abertura do modal e preenche dados
 // monitora abertura do modal e preenche dados
   watch: {
     aberto(novoValor) {
